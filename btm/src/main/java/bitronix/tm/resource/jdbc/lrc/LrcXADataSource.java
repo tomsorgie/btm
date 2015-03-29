@@ -17,13 +17,13 @@ package bitronix.tm.resource.jdbc.lrc;
 
 import bitronix.tm.resource.jdbc.proxy.JdbcProxyFactory;
 import bitronix.tm.utils.ClassLoaderUtils;
-
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 
 /**
@@ -92,6 +92,10 @@ public class LrcXADataSource implements XADataSource {
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
+    }
+    
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+       throw new SQLFeatureNotSupportedException("LrcXADataSource does not support getParentLogger");
     }
 
     @Override

@@ -15,6 +15,23 @@
  */
 package bitronix.tm.resource.jdbc;
 
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
+import javax.sql.DataSource;
+import javax.sql.XADataSource;
+import javax.transaction.xa.XAResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import bitronix.tm.internal.XAResourceHolderState;
 import bitronix.tm.recovery.RecoveryException;
 import bitronix.tm.resource.ResourceConfigurationException;
@@ -25,23 +42,6 @@ import bitronix.tm.resource.common.ResourceBean;
 import bitronix.tm.resource.common.XAPool;
 import bitronix.tm.resource.common.XAResourceProducer;
 import bitronix.tm.utils.ManagementRegistrar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-import javax.sql.DataSource;
-import javax.sql.XADataSource;
-import javax.transaction.xa.XAResource;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Implementation of a JDBC {@link DataSource} wrapping vendor's {@link XADataSource} implementation.
@@ -484,5 +484,9 @@ public class PoolingDataSource extends ResourceBean implements DataSource, XARes
     public void unregister(JdbcPooledConnection xaResourceHolder) {
         xaResourceHolderMap.remove(xaResourceHolder.getXAResource());
 
+    }
+    
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+       return xaDataSource.getParentLogger();
     }
 }

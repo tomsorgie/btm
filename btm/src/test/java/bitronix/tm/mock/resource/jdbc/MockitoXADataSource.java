@@ -23,7 +23,6 @@ import bitronix.tm.mock.events.XAConnectionCloseEvent;
 import bitronix.tm.mock.resource.MockXAResource;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAResource;
@@ -33,12 +32,12 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.anyString;
@@ -80,6 +79,10 @@ public class MockitoXADataSource implements XADataSource {
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
+    }
+    
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+       throw new SQLFeatureNotSupportedException("MockitoXADataSource does not support getParentLogger");
     }
 
     @Override
