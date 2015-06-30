@@ -78,6 +78,7 @@ public class Configuration implements Service {
     private volatile boolean conservativeJournaling;
     private volatile String jdbcProxyFactoryClass;
     private volatile boolean quickSuspend;
+    private volatile String markRollbackCallback;
 
     protected Configuration() {
         try {
@@ -127,6 +128,7 @@ public class Configuration implements Service {
             conservativeJournaling = getBoolean(properties, "bitronix.tm.conservativeJournaling", false);
             jdbcProxyFactoryClass = getString(properties, "bitronix.tm.jdbcProxyFactoryClass", "auto");
             quickSuspend = getBoolean(properties, "bitronix.tm.quickSuspend", false);
+            markRollbackCallback = getString(properties, "bitronix.tm.markRollbackCallback", null);
         } catch (IOException ex) {
             throw new InitializationException("error loading configuration", ex);
         }
@@ -707,6 +709,26 @@ public class Configuration implements Service {
     public Configuration setQuickSuspend(boolean quickSuspend) {
         checkNotStarted();
         this.quickSuspend = quickSuspend;
+        return this;
+    }
+
+    /**
+     * Get the MarkRollbackCallback implementation. Can be <code>null</code> for the default one or a class name.
+     * @return the callback class name.
+     */
+    public String getMarkRollbackCallback() {
+        return markRollbackCallback;
+    }
+
+    /**
+     * Set the MarkRollbackCallback implementation. Can be <code>null</code> for the default one or a class name.
+     * @see #getMarkRollbackCallback()
+     * @param callback the callback class name.
+     * @return this.
+     */
+    public Configuration setMarkRollbackCallback(String callback) {
+        checkNotStarted();
+        this.markRollbackCallback = callback;
         return this;
     }
 

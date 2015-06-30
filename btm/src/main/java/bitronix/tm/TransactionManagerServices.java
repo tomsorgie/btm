@@ -15,6 +15,13 @@
  */
 package bitronix.tm;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import bitronix.tm.journal.DiskJournal;
 import bitronix.tm.journal.Journal;
 import bitronix.tm.journal.NullJournal;
@@ -28,12 +35,7 @@ import bitronix.tm.utils.ClassLoaderUtils;
 import bitronix.tm.utils.DefaultExceptionAnalyzer;
 import bitronix.tm.utils.ExceptionAnalyzer;
 import bitronix.tm.utils.InitializationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import bitronix.tm.utils.MarkRollbackCallback;
 
 /**
  * Container for all BTM services.
@@ -58,6 +60,7 @@ public class TransactionManagerServices {
     private static final AtomicReference<Recoverer> recovererRef = new AtomicReference<Recoverer>();
     private static final AtomicReference<Executor> executorRef = new AtomicReference<Executor>();
     private static final AtomicReference<ExceptionAnalyzer> exceptionAnalyzerRef = new AtomicReference<ExceptionAnalyzer>();
+    private static final AtomicReference<MarkRollbackCallback> markRollbackCallbackRef = new AtomicReference<MarkRollbackCallback>();
 
     /**
      * Create an initialized transaction manager.
@@ -227,7 +230,31 @@ public class TransactionManagerServices {
         return analyzer;
     }
 
-    /**
+   /**
+    * Create the markRollback callback.
+    * @return the markRollback callback.
+    */
+  public static MarkRollbackCallback getMarkRollbackCallback() {
+	  MarkRollbackCallback callback = markRollbackCallbackRef.get();
+       if (callback == null) {
+           String callbackClassName = getConfiguration().getMarkRollbackCallback();
+           callback = MarkRollbackCallback.NoOpImpl.INSTANCE;
+           if (callbackClassName != null) {
+               try {
+            	   callback = (MarkRollbackCallback) ClassLoaderUtils.loadClass(callbackClassName).newInstance();
+               } catch (Exception ex) {
+                   log.warn("failed to initialize custom markRollback callback, using no-op one instead", ex);
+               }
+           }
+           if (!markRollbackCallbackRef.compareAndSet(null, callback)) {
+        	   callback.shutdown();
+        	   callback = markRollbackCallbackRef.get();
+           }
+       }
+       return callback;
+   }
+
+   /**
      * Check if the transaction manager has started.
      * @return true if the transaction manager has started.
      */

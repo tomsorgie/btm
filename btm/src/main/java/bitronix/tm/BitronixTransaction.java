@@ -351,6 +351,11 @@ public class BitronixTransaction implements Transaction, BitronixTransactionMBea
         if (isDone())
             throw new IllegalStateException("transaction is done, cannot change its status");
 
+        try {
+           TransactionManagerServices.getMarkRollbackCallback().onMarkRollbackOnly();
+        } catch (Throwable e) {
+        	log.warn("rollback callback failed, proceeding", e);
+        }
         setStatus(Status.STATUS_MARKED_ROLLBACK);
     }
 
